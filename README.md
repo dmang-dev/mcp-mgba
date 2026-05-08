@@ -7,10 +7,10 @@ Lets your model **read and write GBA memory, inject button presses, take screens
 ## How it works
 
 ```
-┌──────────────────┐  stdio    ┌────────────────┐   TCP :8765    ┌──────────────────┐
-│  MCP client      │ ────────▶ │  mcp-mgba      │ ─────────────▶ │  mGBA emulator   │
-│ (Claude / etc.)  │ JSON-RPC  │  (Node.js)     │  newline JSON  │  bridge.lua      │
-└──────────────────┘           └────────────────┘                └──────────────────┘
++------------------+    stdio     +------------------+   TCP :8765   +------------------+
+|   MCP client     |   JSON-RPC   |     mcp-mgba     |  newline JSON |  mGBA emulator   |
+| (Claude / etc.)  | ===========> |     (Node.js)    | ============> |    bridge.lua    |
++------------------+              +------------------+               +------------------+
 ```
 
 Two pieces:
@@ -27,7 +27,7 @@ Two pieces:
 ### Option A — clone and install globally (recommended for now)
 
 ```bash
-git clone https://github.com/dustink/mcp-mgba
+git clone https://github.com/dmang-dev/mcp-mgba
 cd mcp-mgba
 npm install -g .
 ```
@@ -37,7 +37,7 @@ That puts `mcp-mgba` on your `PATH` (the build runs automatically via `npm insta
 ### Option B — clone without global install
 
 ```bash
-git clone https://github.com/dustink/mcp-mgba
+git clone https://github.com/dmang-dev/mcp-mgba
 cd mcp-mgba
 npm install        # runs the build automatically
 ```
@@ -47,7 +47,7 @@ Then reference the absolute path to `dist/index.js` when registering.
 ### Option C — `npx` from GitHub (no clone needed)
 
 ```bash
-npx -y github:dustink/mcp-mgba
+npx -y github:dmang-dev/mcp-mgba
 ```
 
 `npx` will fetch, build (via `prepare`), and run the server in one shot.
