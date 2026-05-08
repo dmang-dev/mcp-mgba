@@ -4,6 +4,10 @@ An [MCP](https://modelcontextprotocol.io) server that exposes the [mGBA](https:/
 
 Lets your model **read and write GBA memory, inject button presses, take screenshots, and step the emulator** — all through a clean tool interface.
 
+![demo](docs/demo.gif)
+
+*Claude driving an in-development homebrew side-scroller through `mgba_press_buttons` — Start to begin, A to confirm New Game, then Right to walk and A to jump. Each frame is captured via `mgba_screenshot`.*
+
 ## How it works
 
 ```
