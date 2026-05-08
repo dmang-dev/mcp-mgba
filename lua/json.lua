@@ -48,7 +48,7 @@ encode_value = function(v)
         return encode_string(v)
     elseif tv == "table" then
         -- detect array: sequential integer keys starting at 1
-        local n = #t
+        local n = #v
         local is_arr = (n > 0)
         if is_arr then
             for k in pairs(v) do
