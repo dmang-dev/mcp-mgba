@@ -1,5 +1,10 @@
 # mcp-mgba
 
+[![npm version](https://img.shields.io/npm/v/mcp-mgba.svg)](https://www.npmjs.com/package/mcp-mgba)
+[![npm downloads](https://img.shields.io/npm/dm/mcp-mgba.svg)](https://www.npmjs.com/package/mcp-mgba)
+[![CI](https://github.com/dmang-dev/mcp-mgba/actions/workflows/ci.yml/badge.svg)](https://github.com/dmang-dev/mcp-mgba/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/npm/l/mcp-mgba.svg)](LICENSE)
+
 An [MCP](https://modelcontextprotocol.io) server that exposes the [mGBA](https://mgba.io) Game Boy Advance emulator to any MCP-compatible client (Claude Desktop, Claude Code, etc.).
 
 Lets your model **read and write GBA memory, inject button presses, take screenshots, and step the emulator** — all through a clean tool interface.
