@@ -28,33 +28,31 @@ Two pieces:
 
 ## Install
 
-### Option A — clone and install globally (recommended for now)
+### Option A — install from npm (recommended)
+
+```bash
+npm install -g mcp-mgba
+```
+
+Puts `mcp-mgba` on your `PATH`. Verify with `mcp-mgba --help` (it'll print a startup line and wait for stdio — `Ctrl+C` to exit).
+
+### Option B — `npx` (no install)
+
+```bash
+npx -y mcp-mgba
+```
+
+Run on demand. Good for trying it out without committing to a global install.
+
+### Option C — clone and develop
 
 ```bash
 git clone https://github.com/dmang-dev/mcp-mgba
 cd mcp-mgba
-npm install -g .
+npm install        # also runs the build via the `prepare` hook
 ```
 
-That puts `mcp-mgba` on your `PATH` (the build runs automatically via `npm install`'s `prepare` hook). Verify with `mcp-mgba --help` (it'll print a startup line and wait for stdio — `Ctrl+C` to exit).
-
-### Option B — clone without global install
-
-```bash
-git clone https://github.com/dmang-dev/mcp-mgba
-cd mcp-mgba
-npm install        # runs the build automatically
-```
-
-Then reference the absolute path to `dist/index.js` when registering.
-
-### Option C — `npx` from GitHub (no clone needed)
-
-```bash
-npx -y github:dmang-dev/mcp-mgba
-```
-
-`npx` will fetch, build (via `prepare`), and run the server in one shot.
+Then reference the absolute path to `dist/index.js` when registering, or `npm install -g .` to symlink the bin globally.
 
 ## Set up the mGBA bridge
 
