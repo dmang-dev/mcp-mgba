@@ -1,79 +1,145 @@
 # mcp-mgba
 
-MCP server that bridges Claude (or any MCP client) to the [mGBA](https://mgba.io) Game Boy Advance emulator via its Lua scripting API.
+An [MCP](https://modelcontextprotocol.io) server that exposes the [mGBA](https://mgba.io) Game Boy Advance emulator to any MCP-compatible client (Claude Desktop, Claude Code, etc.).
 
-## Architecture
+Lets your model **read and write GBA memory, inject button presses, take screenshots, and step the emulator** — all through a clean tool interface.
+
+## How it works
 
 ```
-Claude / MCP client
-       │  stdio (JSON-RPC 2.0)
-  mcp-mgba (Node.js)
-       │  TCP :8765 (newline-delimited JSON)
-  mGBA emulator
-       └─ lua/bridge.lua  ← Lua script running inside mGBA
+┌──────────────────┐  stdio    ┌────────────────┐   TCP :8765    ┌──────────────────┐
+│  MCP client      │ ────────▶ │  mcp-mgba      │ ─────────────▶ │  mGBA emulator   │
+│ (Claude / etc.)  │ JSON-RPC  │  (Node.js)     │  newline JSON  │  bridge.lua      │
+└──────────────────┘           └────────────────┘                └──────────────────┘
 ```
 
-The Lua bridge runs inside mGBA's scripting engine and polls for connections on every VBlank frame (~60 Hz). The Node.js server speaks to it over a loopback TCP socket.
+Two pieces:
+- **`lua/bridge.lua`** — runs *inside* mGBA's scripting engine, opens a loopback TCP server on port 8765
+- **`dist/index.js`** — Node.js MCP server, talks to the Lua bridge over TCP, exposes tools over stdio
 
-## Setup
+## Requirements
 
-### 1. mGBA
+- [mGBA](https://mgba.io/downloads.html) **0.10 or newer** (with Lua scripting)
+- **Node.js 18+** (for the MCP server)
 
-Download mGBA ≥ 0.10 from <https://mgba.io/downloads.html>.
+## Install
 
-- Load your ROM: **File > Open…**
-- Open the scripting console: **Tools > Scripting…**
-- Click **Open Script** and select `lua/bridge.lua` from this repo.
+### Option A — clone and install globally (recommended for now)
 
-You should see in the console:
+```bash
+git clone https://github.com/dustink/mcp-mgba
+cd mcp-mgba
+npm install -g .
+```
 
+That puts `mcp-mgba` on your `PATH` (the build runs automatically via `npm install`'s `prepare` hook). Verify with `mcp-mgba --help` (it'll print a startup line and wait for stdio — `Ctrl+C` to exit).
+
+### Option B — clone without global install
+
+```bash
+git clone https://github.com/dustink/mcp-mgba
+cd mcp-mgba
+npm install        # runs the build automatically
+```
+
+Then reference the absolute path to `dist/index.js` when registering.
+
+### Option C — `npx` from GitHub (no clone needed)
+
+```bash
+npx -y github:dustink/mcp-mgba
+```
+
+`npx` will fetch, build (via `prepare`), and run the server in one shot.
+
+## Set up the mGBA bridge
+
+1. Launch mGBA and load any GBA ROM.
+2. Open **Tools > Scripting…**
+3. Click **File > Load script** and select `lua/bridge.lua` from this repo.
+
+You should see in the scripting console:
 ```
 [mcp-mgba] bridge listening on 127.0.0.1:8765
 [mcp-mgba] frame callback registered — bridge is active
 ```
 
-### 2. MCP server
+If you see a `bind failed` error, the previous instance's socket is still held — quit and relaunch mGBA.
 
-```powershell
-npm install
-npm run build
-node dist/index.js          # connect to default 127.0.0.1:8765
+## Register with your MCP client
+
+### Claude Code (CLI)
+
+```bash
+claude mcp add mgba --scope user mcp-mgba
 ```
 
-Environment variables:
+(if you used Option B without global install, replace `mcp-mgba` with `node /absolute/path/to/dist/index.js`)
 
-| Variable    | Default       | Purpose                     |
-|-------------|---------------|-----------------------------|
-| `MGBA_HOST` | `127.0.0.1`   | Bridge host                 |
-| `MGBA_PORT` | `8765`        | Bridge port                 |
+Verify:
+```bash
+claude mcp list
+# mgba: mcp-mgba - ✓ Connected
+```
 
-### 3. Register with Claude Desktop
+### Claude Desktop
 
-Add to `claude_desktop_config.json`:
+Edit `claude_desktop_config.json`:
 
+| Platform | Path |
+|---|---|
+| macOS    | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows  | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Linux    | `~/.config/Claude/claude_desktop_config.json` |
+
+Add (assuming Option A — globally installed):
 ```json
 {
   "mcpServers": {
     "mgba": {
-      "command": "node",
-      "args": ["I:/mcp-mgba/dist/index.js"]
+      "command": "mcp-mgba"
     }
   }
 }
 ```
 
-## Available tools
+Or with explicit Node + path (Option B):
+```json
+{
+  "mcpServers": {
+    "mgba": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-mgba/dist/index.js"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop after editing.
+
+### Other MCP clients
+
+The server speaks standard MCP over stdio. Run `mcp-mgba` (or `node dist/index.js`) and connect any MCP client to its stdio.
+
+## Configuration
+
+| Env var     | Default       | Purpose                |
+|-------------|---------------|------------------------|
+| `MGBA_HOST` | `127.0.0.1`   | Bridge host to dial    |
+| `MGBA_PORT` | `8765`        | Bridge port to dial    |
+
+## Tools
 
 | Tool | Description |
 |------|-------------|
-| `mgba_ping` | Verify bridge connectivity |
+| `mgba_ping` | Verify bridge connectivity (returns `pong`) |
 | `mgba_get_info` | Game title, code, frame count |
-| `mgba_read8/16/32` | Read memory at address |
-| `mgba_write8/16/32` | Write to RAM |
+| `mgba_read8` / `mgba_read16` / `mgba_read32` | Read memory at an address |
+| `mgba_write8` / `mgba_write16` / `mgba_write32` | Write to RAM |
 | `mgba_read_range` | Read up to 4096 bytes as a byte array |
 | `mgba_press_buttons` | Hold GBA buttons for N frames |
-| `mgba_advance_frames` | Step emulation N frames |
-| `mgba_pause` / `mgba_unpause` | Pause/resume |
+| `mgba_advance_frames` | Step the emulator N frames |
+| `mgba_pause` / `mgba_unpause` | Pause / resume emulation |
 | `mgba_reset` | Reset the loaded ROM |
 | `mgba_screenshot` | Save a PNG of the current display |
 
@@ -81,31 +147,36 @@ Add to `claude_desktop_config.json`:
 
 `A`, `B`, `Select`, `Start`, `Right`, `Left`, `Up`, `Down`, `R`, `L`
 
-### GBA address space
+### GBA address space (cheat sheet)
 
-| Range | Region |
-|-------|--------|
-| `0x02000000` | EWRAM (256 KiB) |
-| `0x03000000` | IWRAM (32 KiB) |
-| `0x04000000` | IO registers |
-| `0x05000000` | Palette RAM |
-| `0x06000000` | VRAM |
-| `0x07000000` | OAM |
-| `0x08000000` | ROM (read-only) |
+| Range          | Region                        |
+|----------------|-------------------------------|
+| `0x02000000`   | EWRAM (256 KiB, general)      |
+| `0x03000000`   | IWRAM (32 KiB, fast)          |
+| `0x04000000`   | I/O registers                 |
+| `0x05000000`   | Palette RAM                   |
+| `0x06000000`   | VRAM                          |
+| `0x07000000`   | OAM                           |
+| `0x08000000`   | ROM (read-only)               |
 
-## totp-gba notes
+## Troubleshooting
 
-This server was built alongside the sibling [`totp-gba`](../totp-gba) ROM.
-The ROM's software RTC lives in IWRAM — use `mgba_read32` on the IWRAM region
-to find `s_vbl_counter` and `s_base_epoch`. With `mgba_write32` you can
-inject a new epoch to fast-forward or rewind the TOTP clock without
-recompiling.
+| Symptom | Cause / Fix |
+|---|---|
+| `Cannot reach mGBA bridge at 127.0.0.1:8765` | mGBA isn't running, or `bridge.lua` isn't loaded — open Tools > Scripting and load it |
+| `bind failed — port 8765 may already be in use` | A previous mGBA instance still holds the socket; quit and relaunch mGBA |
+| Tool calls hang | The bridge script may have errored out silently after a hot-reload — check the mGBA scripting console |
+| Tools missing in Claude after install | Restart your MCP client; Claude only enumerates servers on startup |
 
 ## Development
 
-```powershell
-npm run dev      # tsc --watch
+```bash
+npm install
+npm run dev      # tsc --watch — autobuilds on src/ changes
 ```
 
-The Lua side (`lua/`) needs no build step — edit and reload the script in
-mGBA's scripting console.
+The Lua side (`lua/bridge.lua` and `lua/json.lua`) needs no build step. Edit and reload via mGBA's `File > Load script`.
+
+## License
+
+[MIT](LICENSE)
