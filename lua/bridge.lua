@@ -50,16 +50,35 @@ local function cmd_read32(p)
     return raw:byte(1) | (raw:byte(2) << 8) | (raw:byte(3) << 16) | (raw:byte(4) << 24)
 end
 
+-- emu:writeN — like emu:readN — intermittently throws "invoking failed" when
+-- pcall'd from a frame callback. Retry up to a few times before giving up.
+local function retry_call(fn, ...)
+    local attempts = 8
+    local last_err
+    for _ = 1, attempts do
+        local ok, err = pcall(fn, ...)
+        if ok then return true end
+        last_err = err
+    end
+    error(last_err)
+end
+
 local function cmd_write8(p)
-    emu:write8(assert(p.address, "address required"), assert(p.value, "value required"))
+    local addr = assert(p.address, "address required")
+    local val  = assert(p.value,   "value required")
+    retry_call(function() emu:write8(addr, val) end)
     return true
 end
 local function cmd_write16(p)
-    emu:write16(assert(p.address, "address required"), assert(p.value, "value required"))
+    local addr = assert(p.address, "address required")
+    local val  = assert(p.value,   "value required")
+    retry_call(function() emu:write16(addr, val) end)
     return true
 end
 local function cmd_write32(p)
-    emu:write32(assert(p.address, "address required"), assert(p.value, "value required"))
+    local addr = assert(p.address, "address required")
+    local val  = assert(p.value,   "value required")
+    retry_call(function() emu:write32(addr, val) end)
     return true
 end
 
@@ -98,8 +117,9 @@ local function cmd_reset()   emu:reset();   return true end
 
 local function cmd_screenshot(p)
     local path = p.path or (os.tmpname() .. ".png")
-    local img = emu:screenshot()
-    img:save(path)
+    -- mGBA's emu:screenshot takes the destination path directly and writes
+    -- the PNG itself; it does not return an image object.
+    emu:screenshot(path)
     return path
 end
 

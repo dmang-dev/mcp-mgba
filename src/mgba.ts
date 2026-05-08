@@ -86,13 +86,28 @@ export class MgbaClient {
     return this.socket !== null && !this.socket.destroyed;
   }
 
-  call<T = unknown>(
+  async call<T = unknown>(
     method: string,
     params?: Record<string, unknown>,
   ): Promise<T> {
-    return new Promise((resolve, reject) => {
-      if (!this.socket || this.socket.destroyed) {
-        reject(new Error("Not connected to mGBA bridge. Is mGBA running with bridge.lua loaded?"));
+    // Lazy (re)connect — bridge.lua reloads kill the socket, and the user
+    // shouldn't have to restart the MCP host every time they edit the script.
+    if (!this.socket || this.socket.destroyed) {
+      try {
+        await this.connect();
+      } catch (err) {
+        throw new Error(
+          `Cannot reach mGBA bridge at ${this.host}:${this.port}. ` +
+          `Make sure mGBA is running with bridge.lua loaded (Tools > Scripting). ` +
+          `Underlying error: ${(err as Error).message}`,
+        );
+      }
+    }
+
+    return new Promise<T>((resolve, reject) => {
+      const sock = this.socket;
+      if (!sock) {
+        reject(new Error("socket vanished after connect"));
         return;
       }
 
@@ -106,7 +121,7 @@ export class MgbaClient {
       });
 
       const msg = JSON.stringify({ id, method, params: params ?? {} }) + "\n";
-      this.socket.write(msg, (err) => {
+      sock.write(msg, (err) => {
         if (err) {
           this.pending.delete(id);
           reject(err);
