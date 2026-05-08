@@ -10,6 +10,7 @@
   "files": [
     "dist/",
     "lua/",
+    "docs/",
     "README.md",
     "LICENSE"
   ],
@@ -23,6 +24,14 @@
   "engines": {
     "node": ">=18"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmang-dev/mcp-mgba.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dmang-dev/mcp-mgba/issues"
+  },
+  "homepage": "https://github.com/dmang-dev/mcp-mgba#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0"
   },
