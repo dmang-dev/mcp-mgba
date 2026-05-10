@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-09
+
+Game Boy / GBC compatibility pass. Driven by a real-world report
+from a sibling project that hit three concrete pain points trying to
+use mcp-mgba against a GB ROM (see `docs/GB-COMPAT-FINDINGS.md`).
+
+### Added
+
+- **`mgba_save_state` / `mgba_load_state`** — slot-based (0-9) or
+  path-based emulator-state I/O. Cleanest way to seed Game Boy
+  cartridge SRAM without fighting MBC.
+- **Capabilities map in `mgba_get_info`** — `capabilities` field
+  reports which optional emu methods (pause, frameAdvance, etc.)
+  this build of mGBA exposes. `platform` and `rom_loaded` flags
+  also added.
+- **GB / GBC address-space cheat sheet** in `mgba_read*` and
+  `mgba_write*` tool descriptions, alongside the GBA map.
+- **MBC caveat** explicitly noted in every `mgba_write*` description:
+  writes are debug-direct, bypass the cartridge bus model, do not
+  trigger MBC commands.
+- **`release_frames`** parameter on `mgba_press_buttons`.
+
+### Changed
+
+- **`mgba_press_buttons` now uses a FIFO queue.** Consecutive calls
+  no longer overwrite each other — each press holds for its own
+  `frames`, then releases for `release_frames`, before the next
+  queued press fires. ROMs that detect input via edge-trigger now
+  see distinct events. Return value changed from `true` to
+  `{queued: true, queue_size: N}`.
+- **Capability detection is deferred to the first frame** rather
+  than running at script-load time. This avoids crashing when the
+  bridge is loaded before a ROM is.
+- **Pause / unpause / frame-advance / screenshot / reset / setKeys
+  / save_state / load_state** all now check the capabilities map
+  before calling the underlying emu method, returning a clean
+  `"emu:foo not available on this mGBA build"` error when the
+  method isn't exposed.
+- **Frame-advance fallback chain:** prefers `emu:frameAdvance`,
+  falls back to `emu:runFrame`, then `emu:step`. Builds that have
+  any of the three will get working `mgba_advance_frames`.
+
 ## [0.1.0] - 2026-05-07
 
 Initial public release.
@@ -44,5 +86,6 @@ Initial public release.
 - `emu:screenshot(path)` writes a PNG directly — does not return an image
   object as some other emulator scripting APIs do.
 
-[Unreleased]: https://github.com/dmang-dev/mcp-mgba/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/dmang-dev/mcp-mgba/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.2.0
 [0.1.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.1.0

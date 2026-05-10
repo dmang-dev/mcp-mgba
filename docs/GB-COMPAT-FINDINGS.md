@@ -12,6 +12,22 @@ testing). But if GB/GBC support is in scope, here's what we hit.
 
 ---
 
+## Status (resolved in v0.2.0)
+
+| # | Finding | Status |
+|---|---------|--------|
+| 1 | `emu:write8` doesn't trigger MBC | **Documented** — write tools now carry an explicit MBC caveat; `mgba_save_state`/`mgba_load_state` added as the recommended workaround for cartridge SRAM seeding. |
+| 2 | `emu:pause`/`unpause`/`frameAdvance` are nil on some builds | **Fixed** — capabilities are feature-detected on the first frame; missing methods return a clean `"emu:foo not available on this mGBA build"` error; available methods are reported in `mgba_get_info.capabilities`. `runFrame` and `step` are tried as `frameAdvance` fallbacks. |
+| 3 | `mgba_press_buttons` consecutive calls overwrite | **Fixed** — `cmd_press_buttons` now appends to a FIFO queue with explicit hold + release frames per record. The frame callback drains the queue one record at a time, guaranteeing edges between presses so ROMs see distinct events. New optional `release_frames` parameter (default 1). |
+| Suggestion: save/load state | **Shipped** — `mgba_save_state` / `mgba_load_state` accept either `slot` (0-9) or `path`. |
+| Suggestion: GB address-space cheat sheet | **Shipped** — `mgba_read*` descriptions now include both GBA and GB/GBC region maps. |
+| Suggestion: mGBA version in `mgba_get_info` | **Partial** — capabilities map ships in `get_info`. Platform identifier added (`emu:platform()`). No version-string API found in mGBA Lua so far; capability map is the authoritative way to know what's supported. |
+| Suggestion: `mgba_get_cart_info` | **Deferred** — would require investigating whether mGBA exposes MBC type / SRAM size in Lua; not urgent. |
+
+Original findings preserved below for reference.
+
+---
+
 ## 1. `emu:write8` does not trigger MBC commands on GB
 
 ### Symptom
