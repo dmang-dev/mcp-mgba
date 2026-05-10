@@ -125,13 +125,31 @@ const TOOLS: Tool[] = [
   },
   {
     name: "mgba_read_range",
-    description: "Read a contiguous range of bytes from GBA memory and return them as an array of integers. Maximum 4096 bytes per call.",
+    description: "Read a contiguous range of bytes from emulated memory and return them as an array of integers. Maximum 4096 bytes per call.",
     inputSchema: {
       type: "object",
       required: ["address", "length"],
       properties: {
         address: { type: "integer", description: "Start address" },
         length:  { type: "integer", minimum: 1, maximum: 4096, description: "Number of bytes to read" },
+      },
+    },
+  },
+  {
+    name: "mgba_write_range",
+    description: `Write a contiguous range of bytes to emulated RAM in one call. Useful for seeding SRAM, patching code blocks, or installing cheats. Maximum 4096 bytes per call.\n\n${MBC_CAVEAT}`,
+    inputSchema: {
+      type: "object",
+      required: ["address", "bytes"],
+      properties: {
+        address: { type: "integer", description: "Start address" },
+        bytes: {
+          type: "array",
+          items: { type: "integer", minimum: 0, maximum: 255 },
+          minItems: 1,
+          maxItems: 4096,
+          description: "Array of byte values (0-255). Length cannot exceed 4096.",
+        },
       },
     },
   },
@@ -314,6 +332,15 @@ export function registerTools(server: Server, mgba: MgbaClient): void {
           .join(" ");
         const addr = (p.address as number).toString(16).toUpperCase();
         return ok(`0x${addr} [${bytes.length} bytes]:\n${hex}`);
+      }
+
+      case "mgba_write_range": {
+        const r = await mgba.call<{ written: number }>("write_range", {
+          address: p.address,
+          bytes:   p.bytes,
+        });
+        const addr = (p.address as number).toString(16).toUpperCase();
+        return ok(`Wrote ${r.written} bytes → 0x${addr}`);
       }
 
       case "mgba_press_buttons": {

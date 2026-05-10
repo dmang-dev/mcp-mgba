@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-10
+
+Polish pass focused on bulk operations and robustness.
+
+### Added
+
+- **`mgba_write_range`** — bulk write counterpart to `mgba_read_range`.
+  Up to 4096 bytes from a JSON byte array in one tool call. Useful for
+  seeding SRAM, patching code blocks, installing cheat tables.
+  Underlying writes use the same retry shielding as the typed
+  `mgba_write*` tools.
+- **`docs/RECIPES.md`** — cookbook of common workflows (RAM hunting,
+  snapshot-experiment-restore, side-scroller automation, etc.) with
+  copy-paste tool-call sequences.
+
+### Changed
+
+- **README troubleshooting section** expanded to cover the four
+  most-common gotchas (script-reload-doesn't-clean, capability
+  errors, intermittent invoking-failed, press queue not yet on the
+  installed version).
+
 ## [0.2.0] - 2026-05-09
 
 Game Boy / GBC compatibility pass. Driven by a real-world report
@@ -86,6 +108,7 @@ Initial public release.
 - `emu:screenshot(path)` writes a PNG directly — does not return an image
   object as some other emulator scripting APIs do.
 
-[Unreleased]: https://github.com/dmang-dev/mcp-mgba/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/dmang-dev/mcp-mgba/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.2.0
 [0.1.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.1.0

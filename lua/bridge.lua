@@ -166,6 +166,19 @@ local function cmd_read_range(p)
     return bytes
 end
 
+-- Bulk write: counterpart to read_range. Loops emu:write8 with the same
+-- retry shielding the typed writes use. Same MBC caveat applies — these are
+-- debug-direct writes, the bus model isn't honoured.
+local function cmd_write_range(p)
+    local addr  = assert(p.address, "address required")
+    local bytes = assert(p.bytes,   "bytes required (array of integers)")
+    if #bytes > 4096 then error("byte count exceeds 4096 limit") end
+    for i, b in ipairs(bytes) do
+        retry_call(function() emu:write8(addr + i - 1, b) end)
+    end
+    return { written = #bytes }
+end
+
 -- Append one press to the queue. `hold` = frames to hold; `release` = frames
 -- to leave keys cleared after, so consecutive presses generate edges.
 local function cmd_press_buttons(p)
@@ -240,6 +253,7 @@ local HANDLERS = {
     write16        = cmd_write16,
     write32        = cmd_write32,
     read_range     = cmd_read_range,
+    write_range    = cmd_write_range,
     press_buttons  = cmd_press_buttons,
     advance_frames = cmd_advance_frames,
     pause          = cmd_pause,

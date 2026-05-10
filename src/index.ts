@@ -24,7 +24,7 @@ async function main() {
   }
 
   const server = new Server(
-    { name: "mcp-mgba", version: "0.2.0" },
+    { name: "mcp-mgba", version: "0.3.0" },
     { capabilities: { tools: {} } },
   );
 

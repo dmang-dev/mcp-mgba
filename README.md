@@ -144,11 +144,15 @@ The server speaks standard MCP over stdio. Run `mcp-mgba` (or `node dist/index.j
 | `mgba_read8` / `mgba_read16` / `mgba_read32` | Read memory at an address |
 | `mgba_write8` / `mgba_write16` / `mgba_write32` | Write to RAM |
 | `mgba_read_range` | Read up to 4096 bytes as a byte array |
-| `mgba_press_buttons` | Hold GBA buttons for N frames |
+| `mgba_write_range` | Write up to 4096 bytes from a byte array |
+| `mgba_press_buttons` | Queue a button press (FIFO; consecutive calls produce distinct events) |
 | `mgba_advance_frames` | Step the emulator N frames |
 | `mgba_pause` / `mgba_unpause` | Pause / resume emulation |
 | `mgba_reset` | Reset the loaded ROM |
 | `mgba_screenshot` | Save a PNG of the current display |
+| `mgba_save_state` / `mgba_load_state` | Save/load emulator state to a slot or path |
+
+See [`docs/RECIPES.md`](docs/RECIPES.md) for end-to-end examples (RAM hunting, snapshot-experiment-restore, side-scroller automation, etc.).
 
 ### GBA button names
 
@@ -174,6 +178,11 @@ The server speaks standard MCP over stdio. Run `mcp-mgba` (or `node dist/index.j
 | `bind failed — port 8765 may already be in use` | A previous mGBA instance still holds the socket; quit and relaunch mGBA |
 | Tool calls hang | The bridge script may have errored out silently after a hot-reload — check the mGBA scripting console |
 | Tools missing in Claude after install | Restart your MCP client; Claude only enumerates servers on startup |
+| Tool calls return data shaped like an old version after editing `bridge.lua` and choosing **Load Script** again | mGBA doesn't fully tear down a previous script when you reload. The new script's `bind()` may succeed but the old frame callback keeps serving requests. **Fix:** quit mGBA entirely, relaunch, load the ROM, then load `bridge.lua` once. Check the console for the `frame callback registered` line — there should be exactly one. |
+| `attempt to index a nil value (global 'emu')` at script load | mGBA's `emu` global only exists once a ROM is loaded. Load any ROM first, *then* load `bridge.lua`. (Or load the script first; capability detection will defer until a ROM is loaded.) |
+| `emu:foo not available on this mGBA build` for `pause`, `unpause`, `frameAdvance`, etc. | This particular build of mGBA doesn't expose that method. The bridge feature-detects on the first frame; check `mgba_get_info` for the full capabilities map. For `frameAdvance`, the bridge falls back to `runFrame` then `step` automatically. |
+| `read8/16/32` returns "invoking failed" intermittently | Known mGBA Lua quirk — the typed read methods are flaky via pcall from the frame callback. The bridge already routes `read8/16/32` through the more reliable `readRange` internally; if you still see this on a write, the retry loop usually clears it within a few attempts. |
+| Multiple `press_buttons` calls don't seem to register as distinct events | Older `mgba_press_buttons` (≤0.1.0) had this bug; v0.2.0+ uses a FIFO queue. Make sure you've upgraded with `npm install -g mcp-mgba` and restarted your MCP client. |
 
 ## Development
 
