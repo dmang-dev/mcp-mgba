@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-05-15
+
+Tool description quality pass — written to Glama's Tool Definition Quality
+Score (TDQS) rubric so every tool maximizes Purpose Clarity, Usage
+Guidelines, Behavioral Transparency, Parameter Semantics, Conciseness,
+and Contextual Completeness.
+
+### Changed
+
+- **Every tool description rewritten to the PURPOSE / USAGE / BEHAVIOR /
+  RETURNS template** — explicit error conditions, explicit
+  when-to-use-this-vs-sibling guidance (e.g. read8 vs read16 vs
+  read_range), explicit destructive-behavior notes for state-mutating
+  tools (`mgba_reset`, `mgba_load_state`, `mgba_write*`,
+  `mgba_screenshot` overwrite, etc.), and explicit return-value shape.
+- **Every parameter now has a description** that adds context beyond
+  the JSON Schema (GBA address-space landmarks, alignment, MBC bypass
+  reminders on writes, slot-vs-path tradeoffs on savestates).
+- **MBC caveat surfaced inline** on every write tool's address
+  parameter description, not just the body — direct memory writes
+  bypass cartridge bus model, prefer `mgba_load_state` for cart-SRAM
+  seeding.
+- **read32 resilience documented** — bridge transparently routes
+  through `readRange(addr, 4)` and reassembles little-endian to work
+  around mGBA's intermittent typed-read flakiness via pcall.
+
 ## [0.3.0] - 2026-05-10
 
 Polish pass focused on bulk operations and robustness.
@@ -108,7 +134,8 @@ Initial public release.
 - `emu:screenshot(path)` writes a PNG directly — does not return an image
   object as some other emulator scripting APIs do.
 
-[Unreleased]: https://github.com/dmang-dev/mcp-mgba/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/dmang-dev/mcp-mgba/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.3.1
 [0.3.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.2.0
 [0.1.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.1.0
