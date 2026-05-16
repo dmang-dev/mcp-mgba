@@ -370,19 +370,20 @@ const TOOLS: Tool[] = [
   {
     name: "mgba_screenshot",
     description:
-      "PURPOSE: Save a PNG screenshot of the current emulator display to a file. " +
-      "USAGE: Use to capture visible game state for inspection, comparison across savestates, or sequence documentation. The image captures whatever the emulator is currently rendering — to capture a specific game state, pause / advance frames / load state first to get the frame you want, then call this. Path is optional; omit it to let mGBA write to its default screenshot directory and report back the chosen filename. " +
-      "BEHAVIOR: DESTRUCTIVE TO TARGET FILE if `path` is supplied: overwrites the file at `path` if it exists, with no prompt or backup. Returns an error if `path` is supplied but the parent directory doesn't exist or isn't writable, or if the bridge's screenshot method is missing on this build. " +
-      "RETURNS: Single line 'Screenshot saved: PATH', where PATH is the file actually written (the value you passed, or mGBA's default-directory file name if `path` was omitted).",
+      "PURPOSE: Save a PNG screenshot of the current emulator display. " +
+      "USAGE: For visual inspection or sequence documentation. To capture a specific frame, pause / advance / load_state first. For full machine state (RAM, registers, mapper) use mgba_save_state instead — screenshots are pixels only, not state. " +
+      "BEHAVIOR: DESTRUCTIVE to `path` if supplied (overwrites without prompt). Errors if `path`'s parent doesn't exist or isn't writable, or if the build doesn't expose screenshot. " +
+      "RETURNS: 'Screenshot saved: PATH' — the path you passed, or mGBA's default-directory filename if `path` was omitted.",
     inputSchema: {
       type: "object",
       properties: {
         path: {
           type: "string",
           description:
-            "Optional absolute filesystem path to write the PNG to (e.g. C:/temp/snap.png on Windows, /tmp/snap.png on Linux/macOS). Parent directory must exist. File is overwritten without prompt if present. Omit to let mGBA pick a filename in its default screenshot directory and return that path.",
+            "Optional absolute PNG path (e.g. C:/temp/snap.png, /tmp/snap.png). Parent must exist; file is overwritten without prompt. Omit to let mGBA choose a filename in its default screenshot directory and return that path.",
         },
       },
+      additionalProperties: false,
     },
   },
 
