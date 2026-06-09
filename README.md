@@ -4,6 +4,10 @@
 [![npm downloads](https://img.shields.io/npm/dm/mcp-mgba.svg)](https://www.npmjs.com/package/mcp-mgba)
 [![CI](https://github.com/dmang-dev/mcp-mgba/actions/workflows/ci.yml/badge.svg)](https://github.com/dmang-dev/mcp-mgba/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/npm/l/mcp-mgba.svg)](LICENSE)
+[![Snyk](https://snyk.io/test/npm/mcp-mgba/badge.svg)](https://snyk.io/test/npm/mcp-mgba)
+[![Socket](https://img.shields.io/badge/Socket-security-2F7BFF?logo=socket)](https://socket.dev/npm/package/mcp-mgba)
+[![Bundlephobia](https://img.shields.io/badge/bundlephobia-size-FF6B81)](https://bundlephobia.com/package/mcp-mgba)
+[![npmgraph](https://img.shields.io/badge/npmgraph-dependencies-2496ED)](https://npmgraph.js.org/?q=mcp-mgba)
 
 An [MCP](https://modelcontextprotocol.io) server that exposes the [mGBA](https://mgba.io) Game Boy Advance emulator to any MCP-compatible client (Claude Desktop, Claude Code, etc.).
 
