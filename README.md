@@ -33,7 +33,7 @@ Two pieces:
 ## Requirements
 
 - [mGBA](https://mgba.io/downloads.html) **0.10 or newer** (with Lua scripting)
-- **Node.js 18+** (for the MCP server)
+- **Node.js 22+** (for the MCP server)
 
 ## Install
 
