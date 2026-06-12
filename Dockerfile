@@ -8,7 +8,7 @@
 # For actual use you don't need Docker — `npm install -g mcp-mgba` and point
 # it at a running mGBA with lua/bridge.lua loaded. See README.md.
 
-FROM node:22-slim
+FROM node:22-trixie-slim
 WORKDIR /app
 
 # Install dependencies. --ignore-scripts skips the `prepare` hook; we run the
