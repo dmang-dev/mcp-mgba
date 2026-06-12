@@ -1,6 +1,6 @@
 {
   "name": "mcp-mgba",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "MCP server that bridges Claude to the mGBA Game Boy Advance emulator via Lua scripting",
   "license": "MIT",
   "type": "module",
