@@ -197,6 +197,16 @@ npm run dev      # tsc --watch — autobuilds on src/ changes
 
 The Lua side (`lua/bridge.lua` and `lua/json.lua`) needs no build step. Edit and reload via mGBA's `File > Load script`.
 
+## Debugging with the MCP Inspector
+
+Browse and call this server's tools interactively with the [MCP Inspector](https://github.com/modelcontextprotocol/inspector):
+
+```bash
+npm run inspector
+```
+
+Build first if you've edited `src/` since your last `npm install` (`npm run build`, or keep `npm run dev` running). Override the bridge address with `MGBA_HOST` / `MGBA_PORT` (default `127.0.0.1:8765`). `tools/list` works even without mGBA connected; *calling* a tool needs mGBA open with `lua/bridge.lua` loaded.
+
 ## License
 
 [MIT](LICENSE)
