@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-06-11
+
+Release-plumbing only. No functional change from 0.3.2 — this version exists
+solely to exercise the new publishing path.
+
+### Changed
+
+- **Published via npm Trusted Publishing (OIDC)** through a new GitHub
+  Actions release workflow, so the package now carries a provenance
+  attestation. No source, dependency, or behavior changes.
+
+## [0.3.2] - 2026-06-11
+
 ### Changed
 
 - **BREAKING: minimum Node version raised from >=18 to >=22.** Node 18 (EOL
@@ -14,6 +27,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   LTS lines are. CI matrix now tests Node 22 + 24, and workflow actions
   bumped to `actions/checkout@v5` / `actions/setup-node@v5` (the v4 actions'
   Node 20 runtime is deprecated by GitHub as of June 2026).
+- **Docker base image moved to Debian 13 trixie** (`node:22-trixie-slim`).
+  The previous `node:22-slim` is bookworm (Debian 12), whose `zlib1g` carries
+  an unpatched integer-overflow CVE; trixie ships the patched zlib while
+  staying on Node 22 LTS.
+- **`mgba_screenshot` description trimmed** for TDQS conciseness.
+- **README badges added** for Socket, Snyk, Bundlephobia, and npmgraph.
+
+### Security
+
+- **Transitive dependencies bumped to clear npm audit advisories.**
+  Lockfile-only bump within existing semver ranges: `hono` to >=4.12.21
+  (GHSA-xrhx-7g5j-rcj5, GHSA-3hrh-pfw6-9m5x, GHSA-f577-qrjj-4474,
+  GHSA-2gcr-mfcq-wcc3) and, where present, `qs` to >=6.15.2
+  (GHSA-q8mj-m7cp-5q26). Both arrive via `@modelcontextprotocol/sdk`'s
+  HTTP-transport deps, which this stdio server does not use at runtime.
+  `npm audit` now reports 0 vulnerabilities.
 
 ## [0.3.1] - 2026-05-15
 
@@ -142,7 +171,9 @@ Initial public release.
 - `emu:screenshot(path)` writes a PNG directly — does not return an image
   object as some other emulator scripting APIs do.
 
-[Unreleased]: https://github.com/dmang-dev/mcp-mgba/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/dmang-dev/mcp-mgba/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.3.3
+[0.3.2]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.3.2
 [0.3.1]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.3.1
 [0.3.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dmang-dev/mcp-mgba/releases/tag/v0.2.0
