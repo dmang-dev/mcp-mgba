@@ -1,9 +1,5 @@
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-  Tool,
-} from "@modelcontextprotocol/sdk/types.js";
-import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { Tool } from "@modelcontextprotocol/server";
+import type { Server } from "@modelcontextprotocol/server";
 import { MgbaClient } from "./mgba.js";
 
 // Address-space cheat sheets (used in tool descriptions). The bridge works on
@@ -455,9 +451,9 @@ function formatHex(n: unknown): string {
 // ── Registration ─────────────────────────────────────────────────────────────
 
 export function registerTools(server: Server, mgba: MgbaClient): void {
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
+  server.setRequestHandler('tools/list', async () => ({ tools: TOOLS }));
 
-  server.setRequestHandler(CallToolRequestSchema, async (req) => {
+  server.setRequestHandler('tools/call', async (req) => {
     const { name, arguments: args = {} } = req.params;
     const p = args as Record<string, unknown>;
 
